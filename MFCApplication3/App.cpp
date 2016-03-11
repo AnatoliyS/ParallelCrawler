@@ -1,7 +1,3 @@
-
-// MFCApplication3.cpp : Defines the class behaviors for the application.
-//
-
 #include "stdafx.h"
 #include "App.h"
 #include "CrawlerView.h"
@@ -14,34 +10,35 @@
 
 using namespace crawler;
 
-// App
-
 BEGIN_MESSAGE_MAP(App, CWinApp)
 	ON_COMMAND(ID_HELP, &CWinApp::OnHelp)
 END_MESSAGE_MAP()
 
-
-// App construction
-
-App::App()
-{
+App::App() {
 	// support Restart Manager
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART;
-
-	// TODO: add construction code here,
-	// Place all significant initialization in InitInstance
 }
 
+App::~App() {}
 
 // The one and only App object
-
 App theApp;
 
+// Crawler initialization
+void App::initCrawler() {
+	crawler = make_shared<Crawler>();
+	view = make_shared<CrawlerView>(this->GetMainWnd());
+	controller = make_unique<CrawlerController>(crawler, view);
+
+	// Show view
+	m_pMainWnd = view.get();
+	BOOL ret = view->Create(IDD_MFCAPPLICATION3_DIALOG, this->GetMainWnd());
+	if (ret)
+		view->ShowWindow(SW_SHOW);
+}
 
 // App initialization
-
-BOOL App::InitInstance()
-{
+BOOL App::InitInstance() {
 	// InitCommonControlsEx() is required on Windows XP if an application
 	// manifest specifies use of ComCtl32.dll version 6 or later to enable
 	// visual styles.  Otherwise, any window creation will fail.
@@ -54,31 +51,14 @@ BOOL App::InitInstance()
 
 	CWinApp::InitInstance();
 
-
 	// Activate "Windows Native" visual manager for enabling themes in MFC controls
 	CMFCVisualManager::SetDefaultManager(RUNTIME_CLASS(CMFCVisualManagerWindows));
-
-	// Standard initialization
-	// If you are not using these features and wish to reduce the size
-	// of your final executable, you should remove from the following
-	// the specific initialization routines you do not need
-	// Change the registry key under which our settings are stored
-	// TODO: You should modify this string to be something appropriate
-	// such as the name of your company or organization
 	SetRegistryKey(_T("Crawler"));
 
-	CrawlerView view;
-	Crawler crawler;
-	CrawlerController controller(crawler, view);
-
-
-
-	m_pMainWnd = &view;
-	INT_PTR nResponse = view.DoModal();
-	
+	initCrawler();
 
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.
-	return FALSE;
+	return TRUE;
 }
 
